@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Sentinel · MechX4 Command Center</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+  <!-- TOP STATUS BAR -->
+  <header class="topbar" role="banner">
+    <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+    <div class="brand">
+      <span class="brand-mark">▣</span>
+      <span class="brand-name">AI SENTINEL</span>
+      <span class="brand-sub">MECHX4</span>
+    </div>
+    <div class="top-status">
+      <div class="bar-chip" id="barSystem">
+        <span class="dot dot-online"></span>
+        <span>SYSTEM <b id="systemStateText">ONLINE</b></span>
+      </div>
+      <div class="bar-chip" id="barEsp32">
+        <span class="dot"></span>
+        <span>ESP32 <b id="esp32StateText">OFFLINE</b></span>
+      </div>
+      <div class="bar-chip" id="barOllama">
+        <span class="dot"></span>
+        <span>OLLAMA <b id="ollamaStateText">READY</b></span>
+      </div>
+      <div class="bar-chip bar-mode">
+        <span>MODE</span>
+        <span class="mode-label" id="modeLabel">SENTINEL</span>
+      </div>
+      <div class="bar-chip bar-demo hidden" id="demoBadge">DEMO MODE</div>
+      <div class="bar-chip bar-time">
+        <span id="clockTime">--:--:--</span>
+        <span id="clockDate" class="bar-date"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar" aria-label="Primary">
+      <ul class="nav-list">
+        <li><a href="#overview" data-route="overview" class="nav-link active"><span class="nav-icon">◎</span>Overview</a></li>
+        <li><a href="#sentinel" data-route="sentinel" class="nav-link"><span class="nav-icon">⬢</span>Sentinel Rover</a></li>
+        <li><a href="#iot" data-route="iot" class="nav-link"><span class="nav-icon">⌁</span>IoT Control</a></li>
+        <li><a href="#assistant" data-route="assistant" class="nav-link"><span class="nav-icon">✉</span>Assistant</a></li>
+        <li><a href="#activity" data-route="activity" class="nav-link"><span class="nav-icon">≣</span>Activity</a></li>
+        <li><a href="#devices" data-route="devices" class="nav-link"><span class="nav-icon">▤</span>Devices</a></li>
+        <li><a href="#health" data-route="health" class="nav-link"><span class="nav-icon">♨</span>System Health</a></li>
+        <li><a href="#settings" data-route="settings" class="nav-link"><span class="nav-icon">⚙</span>Settings</a></li>
+      </ul>
+      <div class="sidebar-foot">
+        <button id="globalStop" class="danger-btn nav-stop">● STOP ALL</button>
+      </div>
+    </nav>
+
+    <!-- NAV OVERLAY (mobile) -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main">
+      <section id="page-overview" class="page active" data-page="overview"></section>
+      <section id="page-sentinel" class="page" data-page="sentinel"></section>
+      <section id="page-iot" class="page" data-page="iot"></section>
+      <section id="page-assistant" class="page" data-page="assistant"></section>
+      <section id="page-activity" class="page" data-page="activity"></section>
+      <section id="page-devices" class="page" data-page="devices"></section>
+      <section id="page-health" class="page" data-page="health"></section>
+      <section id="page-settings" class="page" data-page="settings"></section>
+    </main>
+  </div>
+
+  <!-- TOAST HOST -->
+  <div class="toast-host" id="toastHost" aria-live="polite"></div>
+
+  <!-- CONFIRM / COMMAND RESULT MODAL -->
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" id="modalBox"></div>
+  </div>
+
+  <script src="js/commands.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/eventbus.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/sentinel.js"></script>
+  <script src="js/iot.js"></script>
+  <script src="js/assistant.js"></script>
+  <script src="js/activity.js"></script>
+  <script src="js/devices.js"></script>
+  <script src="js/health.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

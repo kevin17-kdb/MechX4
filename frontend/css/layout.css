@@ -1,0 +1,171 @@
+/* ==========================================================================
+   layout.css — topbar, sidebar, main grid, page transitions
+   ========================================================================== */
+
+/* --- Top status bar --- */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  z-index: 40;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  width: 38px; height: 34px;
+  font-size: 16px;
+}
+
+.brand { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+.brand-mark { color: var(--accent); font-size: 18px; }
+.brand-name { font-weight: 700; letter-spacing: 0.12em; font-size: 15px; }
+.brand-sub {
+  font-size: 11px; color: var(--text-3);
+  letter-spacing: 0.22em;
+  border-left: 1px solid var(--border);
+  padding-left: 8px;
+}
+
+.top-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.top-status::-webkit-scrollbar { display: none; }
+
+.bar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+.bar-chip b { color: var(--text); font-weight: 600; }
+.bar-mode { border-color: var(--accent); color: var(--accent); }
+.mode-label { font-weight: 700; letter-spacing: 0.08em; }
+.bar-demo {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.bar-date { color: var(--text-3); margin-left: -4px; }
+.bar-time { font-variant-numeric: tabular-nums; }
+
+/* Dots */
+.dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--text-3);
+  display: inline-block;
+  flex: none;
+}
+.dot-online { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.dot-warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+.dot-danger { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+.dot-info { background: var(--info); box-shadow: 0 0 6px var(--info); }
+
+/* --- Layout grid --- */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  padding-top: var(--topbar-height);
+  min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  position: fixed;
+  top: var(--topbar-height);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  overflow-y: auto;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 30;
+}
+
+.nav-list { list-style: none; margin: 0; padding: 12px 10px; flex: 1; }
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  color: var(--text-2);
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background var(--transition), color var(--transition);
+  margin-bottom: 2px;
+}
+.nav-link:hover { background: var(--hover); color: var(--text); }
+.nav-link.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+  font-weight: 600;
+}
+.nav-icon { width: 18px; text-align: center; flex: none; opacity: 0.85; }
+
+.sidebar-foot { padding: 12px 10px; border-top: 1px solid var(--border); }
+
+.nav-stop {
+  width: 100%;
+  background: var(--danger);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius);
+  padding: 11px;
+  font-size: 13px;
+}
+.nav-stop:hover { filter: brightness(1.08); }
+.nav-stop:active { transform: translateY(1px); }
+
+/* --- Main --- */
+.main {
+  grid-column: 2;
+  padding: 22px 24px 60px;
+  min-width: 0;
+}
+
+.page { display: none; }
+.page.active { display: block; animation: pageIn 0.22s ease; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- Nav overlay (mobile drawer) --- */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 25;
+}

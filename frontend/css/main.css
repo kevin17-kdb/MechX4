@@ -1,0 +1,177 @@
+/* ==========================================================================
+   AI Sentinel / MechX4 — main.css
+   Base variables, resets, typography, and THEMES.
+   Theming strategy: define CSS custom properties per theme and apply the
+   theme class to <body>. Dark and light variants are supported.
+   ========================================================================== */
+
+:root {
+  --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "Cascadia Code", "Consolas", ui-monospace, monospace;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --sidebar-width: 220px;
+  --topbar-height: 56px;
+  --transition: 0.15s ease;
+
+  /* Semantic status colors (shared across themes) */
+  --ok: #2ecc71;
+  --ok-soft: rgba(46, 204, 113, 0.16);
+  --warn: #f1c40f;
+  --warn-soft: rgba(241, 196, 15, 0.16);
+  --danger: #e74c3c;
+  --danger-soft: rgba(231, 76, 60, 0.16);
+  --info: #3498db;
+  --info-soft: rgba(52, 152, 219, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   DARK THEME (default)
+   -------------------------------------------------------------------------- */
+[data-theme="dark"],
+[data-theme="dark-amber"] {
+  color-scheme: dark;
+  --bg: #0d1013;
+  --bg-2: #0f1317;
+  --panel: #151a1f;
+  --panel-2: #1a2026;
+  --border: #232b33;
+  --border-strong: #303a44;
+  --text: #dbe3ea;
+  --text-2: #9aa7b3;
+  --text-3: #64717d;
+  --accent: #35b6ff;
+  --accent-soft: rgba(53, 182, 255, 0.14);
+  --accent-contrast: #04121c;
+  --shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  --hover: #1d252c;
+  --scroll-thumb: #2c3640;
+}
+
+/* --------------------------------------------------------------------------
+   DARK "GRAPHITE" variant — warmer blacks, cyan accent
+   -------------------------------------------------------------------------- */
+[data-theme="graphite"] {
+  color-scheme: dark;
+  --bg: #101012;
+  --bg-2: #131316;
+  --panel: #18181c;
+  --panel-2: #1e1e24;
+  --border: #26262e;
+  --border-strong: #34343e;
+  --text: #e6e6ec;
+  --text-2: #a0a0ad;
+  --text-3: #6c6c78;
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.14);
+  --accent-contrast: #041214;
+  --shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+  --hover: #202027;
+  --scroll-thumb: #2f2f38;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT THEME — clean, low-contrast professional light UI
+   -------------------------------------------------------------------------- */
+[data-theme="light"],
+[data-theme="slate"],
+[data-theme="light-green"] {
+  color-scheme: light;
+  --bg: #f3f5f7;
+  --bg-2: #eef1f3;
+  --panel: #ffffff;
+  --panel-2: #f7f9fb;
+  --border: #dde3e8;
+  --border-strong: #c6ced6;
+  --text: #1c2733;
+  --text-2: #4c5b68;
+  --text-3: #8a98a5;
+  --accent: #0f7fd1;
+  --accent-soft: rgba(15, 127, 209, 0.10);
+  --accent-contrast: #ffffff;
+  --shadow: 0 6px 20px rgba(20, 40, 60, 0.08);
+  --hover: #eef2f5;
+  --scroll-thumb: #c3ccd3;
+}
+
+/* --------------------------------------------------------------------------
+   LIGHT "SLATE" variant — cool blue-grey light theme
+   -------------------------------------------------------------------------- */
+[data-theme="slate"] {
+  color-scheme: light;
+  --bg: #eef1f4;
+  --bg-2: #e8ecef;
+  --panel: #ffffff;
+  --panel-2: #f5f8fa;
+  --border: #d9e0e6;
+  --border-strong: #bfc9d1;
+  --text: #16222c;
+  --text-2: #45545f;
+  --text-3: #81909b;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+  --accent-contrast: #ffffff;
+  --shadow: 0 6px 20px rgba(15, 40, 65, 0.09);
+  --hover: #eef3f7;
+  --scroll-thumb: #c2ccd4;
+}
+
+/* High contrast "AMBER WARNING" accent override for a variant */
+[data-theme="dark-amber"] {
+  color-scheme: dark;
+  --accent: #f5a623;
+  --accent-soft: rgba(245, 166, 35, 0.14);
+  --accent-contrast: #1c1202;
+}
+
+[data-theme="light-green"] {
+  color-scheme: light;
+  --accent: #0a9d62;
+  --accent-soft: rgba(10, 157, 98, 0.12);
+  --accent-contrast: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--transition), color var(--transition);
+}
+
+h1, h2, h3, h4, h5 { margin: 0 0 0.35em; font-weight: 600; letter-spacing: 0.01em; }
+h1 { font-size: 22px; }
+h2 { font-size: 17px; }
+h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); }
+
+a { color: var(--accent); text-decoration: none; }
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Focus visibility */
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.hidden { display: none !important; }
+
+code, .mono { font-family: var(--font-mono); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
