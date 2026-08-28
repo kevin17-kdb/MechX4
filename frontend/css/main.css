@@ -23,6 +23,12 @@
   --danger-soft: rgba(231, 76, 60, 0.16);
   --info: #3498db;
   --info-soft: rgba(52, 152, 219, 0.16);
+
+  /* Premium look (themes may override) */
+  --accent-2: var(--accent);
+  --glass: transparent;
+  --glow-accent: transparent;
+  --panel-grad: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -41,11 +47,14 @@
   --text-2: #9aa7b3;
   --text-3: #64717d;
   --accent: #35b6ff;
+  --accent-2: #7b5cff;
   --accent-soft: rgba(53, 182, 255, 0.14);
   --accent-contrast: #04121c;
-  --shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   --hover: #1d252c;
   --scroll-thumb: #2c3640;
+  --glass: rgba(21, 26, 31, 0.55);
+  --glow-accent: rgba(53, 182, 255, 0.28);
 }
 
 /* --------------------------------------------------------------------------
@@ -63,11 +72,14 @@
   --text-2: #a0a0ad;
   --text-3: #6c6c78;
   --accent: #22d3ee;
+  --accent-2: #6366f1;
   --accent-soft: rgba(34, 211, 238, 0.14);
   --accent-contrast: #041214;
-  --shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
   --hover: #202027;
   --scroll-thumb: #2f2f38;
+  --glass: rgba(24, 24, 28, 0.55);
+  --glow-accent: rgba(34, 211, 238, 0.28);
 }
 
 /* --------------------------------------------------------------------------
@@ -92,6 +104,8 @@
   --shadow: 0 6px 20px rgba(20, 40, 60, 0.08);
   --hover: #eef2f5;
   --scroll-thumb: #c3ccd3;
+  --glass: var(--panel);
+  --glow-accent: transparent;
 }
 
 /* --------------------------------------------------------------------------
@@ -175,3 +189,45 @@ code, .mono { font-family: var(--font-mono); }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================================================
+   Premium ambient background (dark themes only)
+   A fixed layered canvas of slowly-moving aurora gradients behind the UI.
+   ========================================================================== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(600px 500px at 12% 8%,  var(--glow-accent), transparent 60%),
+    radial-gradient(700px 600px at 88% 20%, rgba(123, 92, 255, 0.18), transparent 62%),
+    radial-gradient(900px 700px at 70% 95%, rgba(53, 182, 255, 0.12), transparent 60%),
+    var(--bg);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 30%, #000 0%, transparent 100%);
+}
+[data-theme="light"] body::before,
+[data-theme="slate"] body::before,
+[data-theme="light-green"] body::before {
+  background: var(--bg);
+  animation: none;
+}
+@keyframes aurora {
+  0%   { filter: hue-rotate(0deg); background-position: 0% 0%, 100% 0%, 0% 100%; }
+  50%  { filter: hue-rotate(10deg); background-position: 10% 5%, 90% 15%, 10% 90%; }
+  100% { filter: hue-rotate(0deg); background-position: 0% 0%, 100% 0%, 0% 100%; }
+}

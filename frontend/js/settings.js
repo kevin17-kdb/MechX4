@@ -55,7 +55,7 @@
       '<div class="field"><label for="ollamaEndpoint">Endpoint</label>' +
       '<input type="text" id="ollamaEndpoint" value="' + UI.safe(set.ollamaEndpoint || "http://127.0.0.1:11434") + '" /></div>' +
       '<div class="field"><label for="ollamaModel">Model</label>' +
-      '<input type="text" id="ollamaModel" value="' + UI.safe(set.ollamaModel || "llama3") + '" /></div>' +
+      '<input type="text" id="ollamaModel" value="' + UI.safe(set.ollamaModel || "gemma3:4b") + '" /></div>' +
       '<div class="hint" style="color:var(--warn)">Secrets should be configured server-side via environment variables, not stored in this browser profile.</div>' +
       "</div>" +
 

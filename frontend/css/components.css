@@ -10,12 +10,30 @@
 
 /* --- Panels --- */
 .panel {
-  background: var(--panel);
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   box-shadow: var(--shadow);
+  position: relative;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--glow-accent), transparent 40%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.6;
+}
+.panel:hover { border-color: var(--border-strong); box-shadow: 0 12px 34px rgba(0,0,0,0.55); }
 .panel + .panel { margin-top: 16px; }
 .panel-head {
   display: flex; align-items: center;
@@ -69,15 +87,40 @@
 
 /* --- Telemetry card --- */
 .telemetry {
-  background: var(--panel);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 84px;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
+.telemetry:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 24px var(--glow-accent); }
 .telemetry .t-label { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
-.telemetry .t-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 4px 0 2px; }
+.telemetry .t-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+  min-height: 30px;
+  line-height: 30px;
+  white-space: nowrap;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 .telemetry .t-sub { font-size: 11px; color: var(--text-3); }
-.telemetry .t-value.empty { color: var(--text-3); }
+.telemetry .t-value.empty {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--text-3);
+}
 
 /* --- Buttons --- */
 .btn {
@@ -97,8 +140,14 @@
 .btn:hover:not(:disabled) { background: var(--hover); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); font-weight: 600; }
-.btn.primary:hover:not(:disabled) { filter: brightness(1.06); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: var(--accent-contrast);
+  font-weight: 600;
+  box-shadow: 0 4px 16px var(--glow-accent);
+}
+.btn.primary:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 6px 22px var(--glow-accent); }
 .btn.succ { background: var(--ok); border-color: var(--ok); color: #07140c; font-weight: 600; }
 .btn.succ:hover:not(:disabled) { filter: brightness(1.1); }
 .btn.ghost { background: transparent; border-color: var(--border); }
@@ -177,14 +226,18 @@
 
 /* --- IoT / device card --- */
 .device-card {
-  background: var(--panel);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
+.device-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 24px var(--glow-accent); }
 .device-card .d-head { display: flex; align-items: center; justify-content: space-between; }
 .device-card .d-name { font-weight: 600; }
 .device-card .d-type { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; }
@@ -197,13 +250,15 @@
   min-height: 320px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--bg-2);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   overflow: hidden;
 }
 .chat-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .msg { max-width: 78%; padding: 9px 12px; border-radius: var(--radius); font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-.msg.ai { background: var(--panel); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 3px; }
-.msg.user { background: var(--accent); color: var(--accent-contrast); align-self: flex-end; border-bottom-right-radius: 3px; }
+.msg.ai { background: var(--panel-2); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 3px; box-shadow: var(--shadow); }
+.msg.user { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; box-shadow: 0 4px 14px var(--glow-accent); }
 .msg-route { font-size: 10px; letter-spacing: 0.07em; opacity: 0.75; margin-bottom: 3px; font-weight: 700; text-transform: uppercase; }
 .msg.typing { display: inline-flex; gap: 3px; align-items: center; }
 .msg.typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); animation: blink 1.2s infinite; }
@@ -305,16 +360,27 @@
 
 /* --- Hero panel (overview) --- */
 .hero {
-  background: var(--panel);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
 }
-.hero .hero-title { font-weight: 800; letter-spacing: 0.14em; font-size: 15px; }
-.hero .hero-state {
+.hero .hero-title,
+.hero-title {
+  font-weight: 800; letter-spacing: 0.14em; font-size: 15px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero .hero-state,
+.hero-state {
   font-size: 26px; font-weight: 800; margin: 8px 0 16px;
   display: flex; align-items: center; gap: 10px;
+  text-shadow: 0 0 18px var(--glow-accent);
 }
 .hero-state .ok-color { color: var(--ok); }
 .hero-state .warn-color { color: var(--warn); }
@@ -325,19 +391,27 @@
 .qa-btn {
   display: flex; flex-direction: column; gap: 5px;
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: var(--radius);
   padding: 16px 12px;
   color: var(--text);
   text-align: left;
-  transition: border-color var(--transition), background var(--transition), transform 0.05s;
+  transition: border-color var(--transition), background var(--transition), transform 0.12s ease, box-shadow 0.2s ease;
 }
-.qa-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.qa-btn:hover { border-color: var(--accent); background: var(--accent-soft); transform: translateY(-2px); box-shadow: 0 8px 22px var(--glow-accent); }
 .qa-btn:active { transform: translateY(1px); }
-.qa-btn .qa-icon { font-size: 20px; color: var(--accent); }
+.qa-btn .qa-icon {
+  font-size: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .qa-btn .qa-label { font-size: 13px; font-weight: 600; }
-.qa-btn.danger-qa:hover { border-color: var(--danger); background: var(--danger-soft); }
-.qa-btn.danger-qa .qa-icon { color: var(--danger); }
+.qa-btn.danger-qa:hover { border-color: var(--danger); background: var(--danger-soft); box-shadow: 0 8px 22px var(--danger-soft); }
+.qa-btn.danger-qa .qa-icon { background: none; -webkit-text-fill-color: var(--danger); color: var(--danger); }
 
 /* --- Toasts --- */
 .toast-host {

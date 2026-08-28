@@ -33,9 +33,32 @@ const CONFIG = {
   },
   ollama: {
     endpoint: process.env.OLLAMA_ENDPOINT || "http://127.0.0.1:11434",
-    model: process.env.OLLAMA_MODEL || "llama3",
+    model: process.env.OLLAMA_MODEL || "gemma3:4b",
   },
 };
+
+// Ollama reachability cache with a short TTL so status stays honest.
+let ollamaReachable = undefined;
+let ollamaReachableAt = 0;
+const OLLAMA_CHECK_TTL = 15000; // re-check at most every 15s, and when stale
+
+async function checkOllama() {
+  const now = Date.now();
+  if (ollamaReachable !== undefined && now - ollamaReachableAt < OLLAMA_CHECK_TTL) {
+    return ollamaReachable;
+  }
+  try {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 3000);
+    const r = await fetch(`${CONFIG.ollama.endpoint}/api/tags`, { signal: c.signal });
+    clearTimeout(t);
+    ollamaReachable = r.ok;
+  } catch (e) {
+    ollamaReachable = false;
+  }
+  ollamaReachableAt = now;
+  return ollamaReachable;
+}
 
 // ---------------------------------------------------------------------------
 // In-memory state (until a real ESP32 reports telemetry)
@@ -180,31 +203,83 @@ async function processCommand({ source = "unknown", text, command, device, actio
   // --- ASSISTANT: route to Ollama (or simulated reply in demo mode) ---
   const reply = await runAssistant(text || normalized);
   const entry = pushActivity({ source, command: "ASSISTANT", mode: "ASSISTANT", status: "success" });
-  return { success: true, mode: "ASSISTANT", command: "ASSISTANT", message: reply, activity: entry };
+  return { success: true, mode: "ASSISTANT", command: "ASSISTANT", message: reply.text, activity: entry };
+}
+
+// Build a focused prompt so Ollama stays on-topic and concise for the MechX4
+// Sentinel system instead of drifting into generic web-style answers.
+function buildAssistantPrompt(user, context) {
+  return [
+    "You are the AI co-pilot of the MechX4 / AI Sentinel command center: an integrated robotics and IoT security system with a rover and smart-home devices.",
+    "Rules:",
+    "- Answer ONLY about this MechX4 system and its declared capabilities (rover patrol/movement, cameras, IoT lights/fans/sensors, system status).",
+    "- If asked about anything outside the system, politely note you only cover the MechX4 system.",
+    "- NEVER invent live data. Use ONLY the provided context. Do not reference real-world sites, outages, or dates (e.g. Google, dates).",
+    "- Be brief and conversational. Use short plain sentences. Keep it under ~90 words. No headers, no bullet lists, no markdown.",
+    "",
+    "Current live status you may reference: " + (context || "none"),
+    "",
+    "Operator request: " + (user || "").trim(),
+  ].join("\n");
+}
+
+// Try real Ollama first (it is a local resource independent of the hardware
+// demo flag). Falls back to a clearly-marked simulated reply only when Ollama
+// is unreachable, so the UI never presents a fake model response as real.
+async function tryOllama(prompt, context) {
+  try {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 60000);
+    const res = await fetch(`${CONFIG.ollama.endpoint}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: CONFIG.ollama.model, prompt: buildAssistantPrompt(prompt, context), stream: false }),
+      signal: controller.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data.response && data.response.trim()) ? data.response.trim() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Snapshot of current system state so the assistant never fabricates telemetry.
+function systemContext() {
+  const esp = CONFIG.esp32.enabled ? "connected" : "offline";
+  const onDevices = devices.filter((d) => d.online).map((d) => d.name).join(", ") || "none online";
+  return [
+    `Backend: online. ESP32 hardware: ${esp}.`,
+    `Ollama: ${checkOllamaCached() ? "ready" : "offline"}.`,
+    `Rover: ${systemState.rover}. IoT devices online: ${onDevices}.`,
+  ].join(" ");
+}
+
+function checkOllamaCached() {
+  return ollamaReachable === true;
 }
 
 async function runAssistant(prompt) {
-  if (CONFIG.ollama.endpoint && !CONFIG.demoMode) {
-    // Real Ollama integration point.
-    try {
-      const res = await fetch(`${CONFIG.ollama.endpoint}/api/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: CONFIG.ollama.model, prompt, stream: false }),
-      });
-      const data = await res.json();
-      return data.response || "No response from model.";
-    } catch (e) {
-      return "Ollama is unreachable. Check that it is running.";
-    }
+  // Determine whether Ollama is currently reachable so we know whether to
+  // surface a real response or a clearly-marked simulated fallback.
+  const ollamaUp = await checkOllama();
+
+  if (ollamaUp) {
+    const reply = await tryOllama(prompt, systemContext());
+    if (reply) return { text: reply, live: true };
   }
-  // Demo mode simulated assistant.
+
+  // Simulated fallback (clearly marked) when Ollama is not reachable.
   const t = (prompt || "").toLowerCase();
-  if (t.includes("status")) return "Backend online. ESP32 offline. Rover standby. Ollama ready (demo mode).";
-  if (t.includes("rover")) return "Rover is in standby mode. 2 IoT devices configured.";
-  if (t.includes("patrol")) return "Patrol command accepted and routed to SENTINEL.";
-  if (t.includes("bed light") || t.includes("fan")) return "That request was routed as an IOT command to ESP32.";
-  return "Received. In demo mode I simulate the assistant; connect Ollama to get live responses.";
+  let text;
+  if (!ollamaUp) text = "Ollama is not reachable. Start Ollama and pull a model, then try again.";
+  else if (t.includes("status")) text = "Backend online. ESP32 offline. Rover standby.";
+  else if (t.includes("rover")) text = "Rover is in standby mode.";
+  else if (t.includes("patrol")) text = "Patrol command accepted and routed to SENTINEL.";
+  else if (t.includes("bed light") || t.includes("fan")) text = "That request was routed as an IOT command to ESP32.";
+  else text = "Received your request (simulated reply — Ollama returned no usable response).";
+  return { text, live: false };
 }
 
 function fail(source, command, mode, sub, reason) {
@@ -215,13 +290,15 @@ function fail(source, command, mode, sub, reason) {
 // ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
-app.get("/api/health", (req, res) => {
+app.get("/api/health", async (req, res) => {
+  const ollamaUp = await checkOllama();
   res.json({
     success: true,
     backend: "online",
     uptime: Math.round(process.uptime()),
     esp32: CONFIG.esp32.enabled ? "connected" : "offline",
-    ollama: "ready",
+    ollama: ollamaUp ? "ready" : "offline",
+    ollamaModel: ollamaUp ? CONFIG.ollama.model : null,
     demoMode: CONFIG.demoMode,
   });
 });

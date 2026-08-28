@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Sentinel · MechX4 Command Center</title>
+  <link rel="icon" href="css/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -14,7 +15,19 @@
   <header class="topbar" role="banner">
     <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
     <div class="brand">
-      <span class="brand-mark">▣</span>
+      <span class="brand-mark" aria-hidden="true">
+        <svg class="emblem" viewBox="0 0 48 48" role="img">
+          <defs>
+            <linearGradient id="emg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#35b6ff"/><stop offset="1" stop-color="#7b5cff"/>
+            </linearGradient>
+          </defs>
+          <polygon class="emblem-shell" points="24,3 42,13 42,34 24,45 6,34 6,13"/>
+          <circle class="emblem-eye" cx="24" cy="23" r="6" fill="none" stroke-width="2.4"/>
+          <circle class="emblem-pupil" cx="24" cy="23" r="2.2"/>
+          <path class="emblem-sweep" d="M24 17 V29 M18 23 H30"/>
+        </svg>
+      </span>
       <span class="brand-name">AI SENTINEL</span>
       <span class="brand-sub">MECHX4</span>
     </div>

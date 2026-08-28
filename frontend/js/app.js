@@ -106,7 +106,7 @@
       state.connection.backend = live && health.backend === "online";
       state.connection.esp32 = live ? health.esp32 === "connected" : false;
       state.connection.ollama = live ? health.ollama === "ready" : false;
-      state.demoMode = !live || !!health.demoMode;
+      state.demoMode = !live;
       if (live) {
         const status = await api.getSystemStatus();
         if (status.success) {

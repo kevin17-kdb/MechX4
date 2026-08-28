@@ -47,7 +47,7 @@
     setVal("latency", s.rover.latency != null ? s.rover.latency + " ms" : "--");
     setVal("ip", "--");
     setVal("signal", s.rover.signal != null ? s.rover.signal + " dBm" : "--");
-    setVal("model", s.connection.ollama ? (s.settings && s.settings.ollamaModel) || "llama3" : "--");
+    setVal("model", s.connection.ollama ? (s.settings && s.settings.ollamaModel) || "gemma3:4b" : "--");
     setVal("battery", s.rover.battery != null ? s.rover.battery + " %" : "--");
     setVal("devices-online", online + " / " + s.devices.length);
 

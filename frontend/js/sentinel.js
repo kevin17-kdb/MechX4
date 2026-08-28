@@ -25,7 +25,7 @@
       '<button class="m-btn" data-command="RIGHT">RIGHT ▶</button>' +
       '<span></span><button class="m-btn" data-command="REVERSE">▼ REVERSE</button><span></span>' +
       "</div>" +
-      '<div class="grid-3" style="margin-top:14px">' +
+      '<div class="grid grid-3" style="margin-top:14px">' +
       '<button class="btn ghost sm" data-command="MODE_MANUAL">Manual</button>' +
       '<button class="btn ghost sm" data-command="MODE_AUTO">Autonomous</button>' +
       '<button class="btn ghost sm" data-command="LIGHTS_ON">Lights</button>' +
@@ -38,7 +38,7 @@
       // Right column: telemetry
       '<div>' +
       '<div class="panel"><div class="panel-head"><span class="panel-title">Telemetry</span></div>' +
-      '<div class="grid-2" style="grid-template-columns: 1fr 1fr">' +
+      '<div class="grid grid-2">' +
       telemetryCard("Battery", "rover-battery", "%") +
       telemetryCard("Wi-Fi Signal", "rover-signal", " dBm") +
       telemetryCard("Speed", "rover-speed", " cm/s") +

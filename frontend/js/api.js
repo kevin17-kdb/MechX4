@@ -148,7 +148,7 @@
   async function request(path, options) {
     const base = getBaseUrl();
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), options && options.timeout || 6000);
+    const timeout = setTimeout(() => controller.abort(), (options && options.timeout) || 6000);
     try {
       const res = await fetch(base + path, Object.assign({ signal: controller.signal }, options));
       clearTimeout(timeout);
@@ -162,15 +162,25 @@
     }
   }
 
-  // Backend URL from settings (overridable in Settings page).
+  // Backend URL from settings (overridable in Settings page). When the
+  // dashboard is served over http(s) by the backend itself (same origin),
+  // auto-discover that origin so it connects with zero configuration. An
+  // explicit Backend URL in Settings always takes precedence.
   function getBaseUrl() {
     const s = state.settings && state.settings.backendUrl;
-    return (s && s.trim()) || "";
+    if (s && s.trim()) return s.trim();
+    const proto = window.location && window.location.protocol;
+    const host = window.location && window.location.host;
+    if ((proto === "http:" || proto === "https:") && host) return proto + "//" + host;
+    return "";
   }
 
   function isConfigured() {
     const s = state.settings && state.settings.backendUrl;
-    return !!s && s.trim().length > 0;
+    if (s && s.trim()) return true;
+    const proto = window.location && window.location.protocol;
+    const host = window.location && window.location.host;
+    return (proto === "http:" || proto === "https:") && !!host;
   }
 
   let lastAttempt; // "live" or "demo"
@@ -237,7 +247,7 @@
       // This is the canonical path for ALL dashboard hardware commands.
       const body = Object.assign({ source: "dashboard" }, payload);
       if (usingLive()) {
-        try { const d = await request("/api/command", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); return { success: true, live: true, ...d }; }
+        try { const d = await request("/api/command", { timeout: 30000, method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); return { success: true, live: true, ...d }; }
         catch (e) { lastAttempt = "demo"; }
       }
       return { success: true, live: false, ...(await mock.sendCommand(body)) };
@@ -247,7 +257,7 @@
       // Natural-language route — backend decides SENTINEL / IOT / ASSISTANT.
       if (usingLive()) {
         try {
-          const d = await request("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: "dashboard", text: message }) });
+          const d = await request("/api/assistant", { timeout: 90000, method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: "dashboard", text: message }) });
           return { success: true, live: true, ...d };
         } catch (e) { lastAttempt = "demo"; }
       }
