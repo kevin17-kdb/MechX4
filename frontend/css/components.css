@@ -86,28 +86,38 @@
 .status-row .val { font-weight: 500; margin-left: auto; text-align: right; }
 
 /* --- Telemetry card --- */
+.telemetry-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+}
 .telemetry {
   background: var(--glass);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 84px;
+  height: 100%;
+  min-height: 92px;
   transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .telemetry:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 24px var(--glow-accent); }
-.telemetry .t-label { color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.telemetry .t-label {
+  color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.telemetry .t-body {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+}
 .telemetry .t-value {
   font-size: 22px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  margin-top: 6px;
-  min-height: 30px;
-  line-height: 30px;
   white-space: nowrap;
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   -webkit-background-clip: text;

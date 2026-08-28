@@ -38,7 +38,7 @@
       // Right column: telemetry
       '<div>' +
       '<div class="panel"><div class="panel-head"><span class="panel-title">Telemetry</span></div>' +
-      '<div class="grid grid-2">' +
+      '<div class="grid grid-2 telemetry-grid">' +
       telemetryCard("Battery", "rover-battery", "%") +
       telemetryCard("Wi-Fi Signal", "rover-signal", " dBm") +
       telemetryCard("Speed", "rover-speed", " cm/s") +
@@ -68,7 +68,12 @@
   }
 
   function telemetryCard(label, id, suffix) {
-    return '<div class="telemetry"><div class="t-label">' + label + '</div><div id="' + id + '">' + UI.teleValue(null, suffix) + "</div></div>";
+    return (
+      '<div class="telemetry">' +
+      '<div class="t-label">' + label + "</div>" +
+      '<div class="t-body" id="' + id + '">' + UI.teleValue(null, suffix) + "</div>" +
+      "</div>"
+    );
   }
 
   function patrolPanel() {
