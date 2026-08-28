@@ -15,6 +15,8 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const http = require("http");
+const https = require("https");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -344,6 +346,61 @@ app.post("/api/rover/command", async (req, res) => {
 app.post("/api/iot/command", async (req, res) => {
   const result = await processCommand({ source: "dashboard", device: req.body && req.body.device, action: req.body && req.body.action });
   res.json(result);
+});
+
+// ---------------------------------------------------------------------------
+// ESP32-CAM proxy — the backend owns the connection to the camera.
+// The dashboard supplies the camera address at runtime (it can change often);
+// the backend performs the actual HTTP request and streams the result back,
+// keeping the backend as the single orchestrator and avoiding any CORS issue.
+// ---------------------------------------------------------------------------
+function camBase(host, port) {
+  const h = String(host || "").trim().replace(/^https?:\/\//i, "").split("/")[0];
+  if (!h) return null;
+  const p = parseInt(port, 10) || CONFIG.esp32.port || 80;
+  return { host: h, port: p, url: "http://" + h + ":" + p };
+}
+
+// Proxy the MJPEG video stream: /stream
+app.get("/api/camera/stream", (req, res) => {
+  const cam = camBase(req.query.host, req.query.port);
+  if (!cam) return res.status(400).json({ success: false, reason: "No camera host configured" });
+  const mod = cam.url.startsWith("https") ? https : http;
+  const upReq = mod.get(cam.url + "/stream", (up) => {
+    res.writeHead(up.statusCode || 200, {
+      "Content-Type": up.headers["content-type"] || "multipart/x-mixed-replace; boundary=frame",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+    });
+    up.pipe(res);
+  });
+  upReq.setTimeout(8000, () => upReq.destroy(new Error("timeout")));
+  upReq.on("error", () => {
+    if (!res.headersSent) res.status(502).json({ success: false, reason: "Camera unreachable" });
+    else upReq.destroy();
+  });
+  res.on("close", () => upReq.destroy());
+});
+
+// Proxy a single JPEG snapshot: /capture (Ai-Thinker) or / (root)
+app.get("/api/camera/snapshot", (req, res) => {
+  const cam = camBase(req.query.host, req.query.port);
+  if (!cam) return res.status(400).json({ success: false, reason: "No camera host configured" });
+  const mod = cam.url.startsWith("https") ? https : http;
+  const paths = ["/capture", "/"];
+  const tryPath = (i) => {
+    if (i >= paths.length) return res.status(502).json({ success: false, reason: "Camera snapshot unavailable" });
+    const req2 = mod.get(cam.url + paths[i], (up) => {
+      if (up.statusCode !== 200) { up.resume(); return tryPath(i + 1); }
+      res.status(200);
+      res.set("Content-Type", up.headers["content-type"] || "image/jpeg");
+      res.set("Cache-Control", "no-store");
+      up.pipe(res);
+    });
+    req2.setTimeout(6000, () => req2.destroy(new Error("timeout")));
+    req2.on("error", () => { if (!res.headersSent) tryPath(i + 1); else req2.destroy(); });
+  };
+  tryPath(0);
 });
 
 // Serve static frontend

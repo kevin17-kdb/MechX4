@@ -49,6 +49,7 @@
       '<input type="text" id="esp32Host" value="' + UI.safe(set.esp32Host || "192.168.1.100") + '" /></div>' +
       '<div class="field"><label for="esp32Port">Port</label>' +
       '<input type="number" id="esp32Port" value="' + (set.esp32Port || 80) + '" /></div>' +
+      '<div class="hint">Also used by the camera stream on the Sentinel Rover page — edit it there too if the CAM IP changes.</div>' +
       "</div>" +
 
       '<div class="panel"><div class="panel-head"><span class="panel-title">Ollama</span></div>' +

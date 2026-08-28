@@ -54,17 +54,100 @@
   }
 
   function cameraPanel() {
+    const set = (window.AppState && window.AppState.settings) || {};
+    const host = set.esp32Host || "";
+    const port = set.esp32Port || 81;
     return (
       '<div class="panel"><div class="panel-head"><span class="panel-title">Camera</span>' +
-      '<div class="camera-bar">' +
+      '<div class="cam-actions">' +
       '<button class="btn sm" data-cam="fullscreen">⛶ Fullscreen</button>' +
       '<button class="btn sm" data-cam="snapshot">◉ Snapshot</button>' +
       "</div></div>" +
+      '<div class="cam-config">' +
+      '<input id="camHost" class="cam-host" type="text" placeholder="ESP32-CAM IP (e.g. 192.168.1.101)" value="' + UI.safe(host) + '" spellcheck="false" />' +
+      '<input id="camPort" class="cam-port" type="number" min="1" max="65535" placeholder="81" value="' + (port || "") + '" />' +
+      '<button class="btn primary sm" id="camConnect" data-cam="connect">▶ Connect</button>' +
+      "</div>" +
       '<div class="camera-panel" id="cameraArea">' +
-      '<div class="placeholder"><div class="cam-icon">📷</div><div><b>NO LIVE STREAM</b></div><div>Camera integration pending</div>' +
-      '<div style="margin-top:8px"><span class="badge err">Not connected</span></div></div>' +
+      '<div class="placeholder cam-placeholder" id="camPlaceholder">' +
+      '<div class="cam-icon">📷</div><div><b>NO LIVE STREAM</b></div>' +
+      '<div>Enter the ESP32-CAM IP above and press Connect</div>' +
+      '<div style="margin-top:8px"><span class="badge err">Camera not connected</span></div>' +
+      "</div>" +
+      '<img class="camera-feed hidden" id="cameraFeed" alt="ESP32-CAM live stream" />' +
       "</div></div>"
     );
+  }
+
+  // Resolve the current camera address from the editable fields / settings.
+  function camAddress() {
+    const set = (window.AppState && window.AppState.settings) || {};
+    let host = (document.getElementById("camHost") && document.getElementById("camHost").value.trim()) || set.esp32Host || "";
+    const portEl = document.getElementById("camPort");
+    const port = parseInt(portEl && portEl.value, 10) || set.esp32Port || 81;
+    if (!host) return null;
+    return { host: host.replace(/^https?:\/\//i, "").split("/")[0], port: port, query: encodeURIComponent(host) + "&port=" + port };
+  }
+
+  // Persist the edited CAM address into the shared settings (same source as Settings page).
+  function saveCamAddress() {
+    const set = window.AppState.settings || (window.AppState.settings = {});
+    const hostEl = document.getElementById("camHost");
+    const portEl = document.getElementById("camPort");
+    if (hostEl) set.esp32Host = hostEl.value.trim();
+    if (portEl) set.esp32Port = parseInt(portEl.value, 10) || 81;
+    window.persistSettings();
+  }
+
+  // Toggle the live feed / placeholder based on camera state.
+  function setCamStatus(connected) {
+    const feed = document.getElementById("cameraFeed");
+    const ph = document.getElementById("camPlaceholder");
+    if (!feed || !ph) return;
+    feed.classList.toggle("hidden", !connected);
+    ph.classList.toggle("hidden", connected);
+    const b = ph && ph.querySelector(".badge");
+    if (connected) {
+      const addr = camAddress();
+      feed.src = "/api/camera/stream?host=" + addr.query;
+      if (b) { b.className = "badge succ"; b.innerHTML = '<span class="dot dot-online"></span>Live · ' + addr.host; }
+      if (ph) ph.querySelector("b").textContent = "LIVE STREAM";
+    } else {
+      feed.removeAttribute("src");
+      if (b) { b.className = "badge err"; b.textContent = "Camera not connected"; }
+      if (ph) ph.querySelector("b").textContent = "NO LIVE STREAM";
+    }
+  }
+
+  function connectCamera() {
+    const addr = camAddress();
+    if (!addr) { toast.error("Enter an ESP32-CAM IP address first"); return; }
+    saveCamAddress();
+    setCamStatus(true);
+    toast.info("Connecting to camera at " + addr.host + ":" + addr.port + "…");
+    document.getElementById("cameraFeed").addEventListener(
+      "error",
+      function onErr() {
+        this.removeEventListener("error", onErr);
+        setCamStatus(false);
+        toast.error("Cannot reach camera at " + addr.host + ":" + addr.port);
+      },
+      { once: true }
+    );
+  }
+
+  function snapshotCamera() {
+    const addr = camAddress();
+    if (!addr) { toast.error("Enter an ESP32-CAM IP address first"); return; }
+    saveCamAddress();
+    window.open("/api/camera/snapshot?host=" + addr.query, "_blank");
+  }
+
+  function fullscreenCamera() {
+    const feed = document.getElementById("cameraFeed");
+    if (!feed || feed.classList.contains("hidden")) { toast.info("Connect the camera first"); return; }
+    if (feed.requestFullscreen) feed.requestFullscreen();
+    else toast.info("Fullscreen not supported");
   }
 
   function telemetryCard(label, id, suffix) {
@@ -103,8 +186,10 @@
       }
       const cam = e.target.closest("[data-cam]");
       if (cam) {
-        if (cam.dataset.cam === "snapshot") toast.info("Snapshot unavailable — camera not connected");
-        if (cam.dataset.cam === "fullscreen") toast.info("Camera stream unavailable");
+        const kind = cam.dataset.cam;
+        if (kind === "connect") connectCamera();
+        else if (kind === "snapshot") snapshotCamera();
+        else if (kind === "fullscreen") fullscreenCamera();
       }
     });
     // Support keyboard shortcut: space = stop (when not typing in an input)
